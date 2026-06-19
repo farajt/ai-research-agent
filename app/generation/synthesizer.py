@@ -23,7 +23,13 @@ SYSTEM_PROMPT = """You are a research assistant. Answer the user's question usin
 provided source chunks below. Every factual claim must be followed by a citation marker
 like [S1] or [S2] referencing the exact source chunk that supports it. If the sources do
 not contain enough information to answer confidently, say so explicitly instead of guessing.
-Do not invent citation numbers that were not provided to you."""
+Do not invent citation numbers that were not provided to you.
+
+Multiple sources will often make the same or overlapping point. Do NOT restate the same
+point multiple times just because multiple sources say it. Instead, make the point ONCE
+and attach all supporting citations to it together, like [S1][S4]. Write a concise,
+well-organized answer - prefer fewer, denser sentences over repeating similar statements
+in different words across multiple paragraphs."""
 
 
 def synthesize_answer(question: str, chunks: list[dict]) -> dict:
