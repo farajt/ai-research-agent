@@ -1,0 +1,22 @@
+Retrieval-Augmented Generation (RAG) Notes
+
+RAG combines a retrieval system with a language model. Instead of relying purely on
+what the model memorized during training, the system fetches relevant external
+documents at query time and feeds them into the model's context window.
+
+Hybrid retrieval combines two retrieval methods: dense vector search (which matches
+on semantic meaning) and sparse keyword search such as BM25 (which matches on exact
+terms). Vector search alone tends to underperform on exact identifiers, proper nouns,
+and rare terms, because embedding models are optimized for semantic similarity, not
+lexical overlap.
+
+Reranking is a second-stage refinement step. The initial retrieval pass (typically a
+bi-encoder, where the query and documents are embedded independently) is optimized
+for speed across large collections. A cross-encoder reranker, which processes the
+query and each candidate document together in a single forward pass, is far more
+accurate but too slow to run across an entire database - so it is only applied to the
+top candidates returned by the first-stage retriever.
+
+Citation grounding requires the generation step to tie every claim in the output back
+to a specific retrieved chunk, rather than allowing the model to freely synthesize
+text that may not be supported by the provided sources.
