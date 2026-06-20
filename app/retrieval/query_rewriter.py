@@ -1,6 +1,7 @@
 import json
 
 from langchain_groq import ChatGroq
+from langfuse import observe
 
 from app.config import settings
 
@@ -23,6 +24,7 @@ Respond with ONLY a JSON array of strings, nothing else. No markdown, no explana
 Example: ["query one", "query two"]"""
 
 
+@observe()
 def rewrite_query(question: str) -> list[str]:
     llm = get_llm()
     response = llm.invoke(

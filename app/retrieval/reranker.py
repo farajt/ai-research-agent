@@ -1,4 +1,5 @@
 from sentence_transformers import CrossEncoder
+from langfuse import observe
 
 _reranker = None
 
@@ -10,6 +11,7 @@ def get_reranker():
     return _reranker
 
 
+@observe()
 def rerank(query: str, candidates: list[dict], top_k: int = 6) -> list[dict]:
     """Scores each (query, candidate) pair together in a single forward pass -
     far more precise than the bi-encoder/BM25 first-pass retrieval, but too

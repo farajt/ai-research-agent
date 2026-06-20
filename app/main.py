@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from langfuse import observe
 
 from app.retrieval.web_search import web_search
 from app.retrieval.vector_search import vector_search
@@ -31,6 +32,7 @@ def _dedupe(chunks: list[dict]) -> list[dict]:
 
 
 @app.post("/query")
+@observe()
 def query(request: QueryRequest):
     """
     Full week 2 pipeline:

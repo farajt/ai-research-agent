@@ -1,3 +1,5 @@
+from langfuse import observe
+
 from app.retrieval.vector_search import vector_search
 from app.ingestion.bm25_store import bm25_search
 
@@ -26,6 +28,7 @@ def reciprocal_rank_fusion(result_lists: list[list[dict]], k: int = 60) -> list[
     return [doc_lookup[dk] for dk in ranked_keys]
 
 
+@observe()
 def hybrid_local_search(query: str, top_k: int = 10) -> list[dict]:
     """The 'true' hybrid search: dense (vector) + sparse (BM25) over the local
     knowledge base, merged via rank fusion. Distinct from merging web + vector

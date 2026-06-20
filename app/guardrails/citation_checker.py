@@ -2,6 +2,7 @@ import re
 import json
 
 from langchain_groq import ChatGroq
+from langfuse import observe
 
 from app.config import settings
 
@@ -51,19 +52,38 @@ Respond with ONLY a JSON array, no markdown, no explanation. Each item must look
 
 
 def _build_verification_prompt(claims: list[dict], chunks: list[dict]) -> str:
+    """Lists each referenced source's full text exactly ONCE, then references
+    it by ID in each claim line. The earlier version repeated full source
+    text for every claim that cited it - with several claims often citing
+    the same 2-3 sources, that duplicated large chunks of text 10-20x over
+    and blew past the LLM provider's per-request token limit. This version
+    sends each source's content a single time regardless of how many claims
+    cite it.
+    """
     source_lookup = {f"S{i}": c for i, c in enumerate(chunks, start=1)}
 
-    lines = ["Claims to verify:\n"]
+    # Only include sources actually cited by at least one claim, and only once each
+    referenced_ids = sorted(
+        {cid for claim in claims for cid in claim["citation_ids"]},
+        key=lambda x: int(x[1:]),
+    )
+
+    lines = ["Sources:\n"]
+    for cid in referenced_ids:
+        source = source_lookup.get(cid)
+        if source:
+            lines.append(f"{cid}: {source['content']}")
+    lines.append("")
+
+    lines.append("Claims to verify:\n")
     for claim in claims:
-        lines.append(f"Claim: {claim['sentence']}")
-        for cid in claim["citation_ids"]:
-            source = source_lookup.get(cid)
-            if source:
-                lines.append(f"  Cited source {cid}: {source['content']}")
-        lines.append("")
+        cited = ", ".join(claim["citation_ids"])
+        lines.append(f"Claim: {claim['sentence']} (cited sources: {cited})")
+
     return "\n".join(lines)
 
 
+@observe(as_type="generation")
 def check_groundedness(answer: str, chunks: list[dict]) -> dict:
     """Runs a second LLM pass to verify every cited claim in the answer is
     actually backed up by its source. This catches a failure mode the first
@@ -79,26 +99,46 @@ def check_groundedness(answer: str, chunks: list[dict]) -> dict:
     llm = get_llm()
     prompt = _build_verification_prompt(claims, chunks)
 
-    response = llm.invoke(
-        [
-            {"role": "system", "content": GUARDRAIL_SYSTEM_PROMPT},
-            {"role": "user", "content": prompt},
-        ]
-    )
+    try:
+        response = llm.invoke(
+            [
+                {"role": "system", "content": GUARDRAIL_SYSTEM_PROMPT},
+                {"role": "user", "content": prompt},
+            ]
+        )
+    except Exception as e:
+        # The guardrail is a safety net, not the main path - if the call
+        # itself fails (rate limit, network issue, provider outage), don't
+        # take the whole /query endpoint down with it. Surface the failure
+        # so it's visible, but let the answer through ungrounded-unverified
+        # rather than erroring out entirely.
+        return {
+            "checked_claims": len(claims),
+            "flagged_claims": [],
+            "is_fully_grounded": None,
+            "guardrail_error": f"Guardrail LLM call failed: {str(e)}",
+        }
 
     raw = response.content.strip().replace("```json", "").replace("```", "").strip()
 
+    # Models sometimes add a sentence before/after the JSON despite instructions
+    # not to. Extract just the [...] portion rather than requiring the whole
+    # response to be clean JSON - more forgiving, fewer false "parse failed" results.
+    array_match = re.search(r"\[.*\]", raw, re.DOTALL)
+    json_candidate = array_match.group(0) if array_match else raw
+
     try:
-        verdicts = json.loads(raw)
+        verdicts = json.loads(json_candidate)
     except json.JSONDecodeError:
-        # Fail safe: if the guardrail's own output can't be parsed, don't
-        # block the answer - just surface that the check couldn't complete,
-        # so this is visible rather than silently swallowed.
+        # Fail safe: if the guardrail's own output still can't be parsed,
+        # don't block the answer - just surface what came back so it's
+        # visible and debuggable, rather than a generic unhelpful message.
         return {
             "checked_claims": len(claims),
             "flagged_claims": [],
             "is_fully_grounded": None,
             "guardrail_error": "Could not parse guardrail response",
+            "guardrail_raw_output": raw[:500],
         }
 
     flagged = [v for v in verdicts if isinstance(v, dict) and v.get("supported") is False]

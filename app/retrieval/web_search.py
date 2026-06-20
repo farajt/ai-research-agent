@@ -1,4 +1,5 @@
 from tavily import TavilyClient
+from langfuse import observe
 
 from app.config import settings
 
@@ -12,6 +13,7 @@ def get_client():
     return _client
 
 
+@observe()
 def web_search(query: str, max_results: int = 5):
     """search_depth='advanced' costs more credits but returns much better
     content extraction than 'basic' - worth it for a research agent."""
