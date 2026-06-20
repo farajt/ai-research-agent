@@ -2,6 +2,7 @@ from langchain_groq import ChatGroq
 from langfuse import observe
 
 from app.config import settings
+from app.utils.retry import with_retry
 
 _llm = None
 
@@ -34,6 +35,7 @@ in different words across multiple paragraphs."""
 
 
 @observe(as_type="generation")
+@with_retry()
 def synthesize_answer(question: str, chunks: list[dict]) -> dict:
     llm = get_llm()
     context = build_context(chunks)

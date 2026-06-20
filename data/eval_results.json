@@ -1,0 +1,178 @@
+{
+  "naive": [
+    {
+      "question": "What is the difference between a bi-encoder and a cross-encoder?",
+      "answer": "Bi-encoders and cross-encoders are two architectures used in natural language processing (NLP) for tasks like text similarity, retrieval, or ranking. The key difference lies in how they process input pairs. Bi-encoders encode two text inputs separately into fixed-dimensional vectors and then compute similarity, whereas cross-encoders process both inputs together in a single pass, allowing direct interaction between tokens of both texts [S1][S3][S4]. This distinction impacts their performance, speed, and suitable use cases.\n\nBi-encoders are efficient for large-scale similarity tasks, such as search engines, where embeddings are precomputed, and they scale well [S1]. However, since the two texts are encoded independently, they may miss nuanced interactions. Bi-encoders are better suited for initial searches, where speed and efficiency are critical, such as in real-time search or recommendation systems [S1].\n\nCross-encoders, on the other hand, are better suited for smaller-scale tasks requiring high precision, such as final ranking or pairwise classification [S1]. They are more accurate but slower and less scalable than bi-encoders [S5]. Cross-encoders are ideal for refining results and handling complex queries, such as medical or legal documents where subtle differences matter [S5].\n\nA common technique in information retrieval is to use a bi-encoder for initial candidate retrieval and a cross-encoder for refinement [S1][S3]. This approach balances the efficiency of bi-encoders with the accuracy of cross-encoders, potentially offering a more versatile solution for complex retrieval tasks [S3].\n\nIn summary, bi-encoders are faster and more scalable but less accurate, while cross-encoders are more accurate but slower and less scalable [S5]. The choice between the two depends on the use case and the trade-off between accuracy and efficiency [S5].",
+      "num_sources": 7,
+      "latency_seconds": 8.36,
+      "guardrail": {
+        "checked_claims": 10,
+        "flagged_claims": [
+          {
+            "claim": "Cross-encoders are ideal for refining results and handling complex queries, such as medical or legal documents where subtle differences matter [S5].",
+            "supported": false,
+            "reason": "The cited source [S5] actually says that cross-encoders are ideal for refining results and handling complex queries, but it does not specify medical or legal documents."
+          }
+        ],
+        "is_fully_grounded": false
+      },
+      "keyword_coverage": 1.0,
+      "grounding_rate": 0.9
+    },
+    {
+      "question": "What is hybrid search in information retrieval?",
+      "answer": "Hybrid search in information retrieval is a technique that combines two or more search methods into a single ranked list to improve relevance and recall. It typically blends traditional keyword-based searching with more advanced techniques such as natural language processing (NLP), semantic search, and machine learning [S1][S2][S3][S4][S5][S6]. This approach is ideal for enterprise environments where diverse and complex queries are common, providing employees with quick and accurate access to information [S2]. Hybrid search enhances product search in e-commerce by understanding user intent and context, leading to better product recommendations and increased sales [S2]. It also helps retrieve both specific documents and thematically related content, making it useful for researchers and academics [S2].\n\nHybrid search combines lexical search and semantic search to deliver results that are both precise and contextually relevant [S4]. It uses techniques like Reciprocal Rank Fusion (RRF) or relative score fusion (RSF) to merge the results from semantic and token-based searches [S3]. This approach prioritizes items that are highly ranked in both semantic and keyword search results [S3]. Hybrid search can return results that are both relevant in terms of meaning and also include specific keywords [S3]. It also handles out-of-domain data by effectively capturing out-of-domain terms that may not be included in the embedding model's training data [S3].\n\nHybrid search is particularly valuable in enterprise and generative AI applications where accuracy, explainability, and relevance must coexist [S4]. It combines the strengths of symbolic (keyword-based) search and neural (semantic) search, bridging the gap between high-speed keyword matching and the contextual understanding required to parse unstructured data sources effectively [S5]. The integration of hybrid and vector search combines the strengths of both methods to deliver even more relevant search results [S5].",
+      "num_sources": 7,
+      "latency_seconds": 40.46,
+      "guardrail": {
+        "checked_claims": 12,
+        "flagged_claims": [
+          {
+            "claim": "Hybrid search uses Reciprocal Rank Fusion (RRF) to merge results from semantic and token-based searches",
+            "supported": false,
+            "reason": "Source S4 mentions that hybrid search improves result quality by merging BM25-based keyword relevance with vector similarity using techniques like reciprocal rank fusion (RRF) or relative score fusion (RSF), but it does not specifically mention that it uses RRF to merge results from semantic and token-based searches."
+          },
+          {
+            "claim": "Hybrid search enhances product search in e-commerce by understanding user intent and context, leading to better product recommendations and increased sales",
+            "supported": false,
+            "reason": "Source S4 mentions that hybrid search combines lexical search and semantic search to deliver results that are both precise and contextually relevant, but it does not specifically mention that it enhances product search in e-commerce."
+          },
+          {
+            "claim": "It also helps retrieve both specific documents and thematically related content, making it useful for researchers and academics",
+            "supported": false,
+            "reason": "Source S4 mentions that hybrid search combines lexical search and semantic search to deliver results that are both precise and contextually relevant, but it does not specifically mention that it helps retrieve both specific documents and thematically related content."
+          }
+        ],
+        "is_fully_grounded": false
+      },
+      "keyword_coverage": 0.5,
+      "grounding_rate": 0.75
+    },
+    {
+      "question": "Why is reranking used after initial retrieval?",
+      "answer": "Reranking is used after initial retrieval to refine the results and improve their relevance to the query. This is because the initial retrieval process is often a lossy process that preserves recall but introduces entropy, resulting in many weakly or spuriously related documents [S1]. Reranking acts as an information refinement layer, minimizing the conditional entropy of the final selection given the query and maximizing mutual information between the query and the selected documents [S1]. This process is necessary because the initial retriever may prioritize speed over precision, leading to initial relevance but poor ranking [S2]. Reranking uses deeper semantic analysis to reorder the documents, ensuring the most relevant documents appear at the top of the results [S2]. \n\nThe main reason reranking is used is that it is more accurate than the initial retriever, which is often a bi-encoder that compresses all possible meanings of a document into a single vector, losing information [S5]. Reranking uses a cross-encoder that processes the query and each candidate document together, resulting in a more accurate similarity score [S5]. Additionally, reranking is necessary to maximize retrieval recall by retrieving plenty of documents and then maximizing LLM recall by minimizing the number of documents that make it to the LLM [S5].",
+      "num_sources": 7,
+      "latency_seconds": 41.79,
+      "guardrail": {
+        "checked_claims": 7,
+        "flagged_claims": [
+          {
+            "claim": "Additionally, reranking is necessary to maximize retrieval recall by retrieving plenty of documents and then maximizing LLM recall by minimizing the number of documents that make it to the LLM",
+            "supported": false,
+            "reason": "S5 mentions maximizing LLM recall, but it does not mention minimizing the number of documents as the reason for reranking."
+          }
+        ],
+        "is_fully_grounded": false
+      },
+      "keyword_coverage": 0.6666666666666666,
+      "grounding_rate": 0.8571428571428571
+    },
+    {
+      "question": "What is Reciprocal Rank Fusion?",
+      "answer": "Reciprocal Rank Fusion (RRF) is a technique for combining multiple ranked lists of search results into a single ranking [S1]. It operates on a simple principle: documents that appear highly ranked across multiple search methods are likely to be genuinely relevant [S3]. RRF works by calculating RRF scores for each document that appears in any list, multiplying by the weight (if used), and then merging all documents and sorting by their combined RRF scores [S1]. The constant k=60 is often used, but can be tuned based on the specific use case and data characteristics [S1].\n\nRRF has three key strengths: it is elegant in its simplicity, robust, and proven effective [S1]. It is used in Azure AI Search to merge and homogenize rankings from multiple queries into a single result set [S2]. RRF is also a powerful tool in Retrieval-Augmented Generation (RAG) systems, allowing for the combination of rankings from multiple retrievers in a mathematically sound and intuitively appealing way [S3].",
+      "num_sources": 7,
+      "latency_seconds": 34.64,
+      "guardrail": {
+        "checked_claims": 7,
+        "flagged_claims": [],
+        "is_fully_grounded": true
+      },
+      "keyword_coverage": 1.0,
+      "grounding_rate": 1.0
+    },
+    {
+      "question": "What does it mean for an AI answer to be grounded in its sources?",
+      "answer": "Grounding in AI refers to the practice of ensuring that every substantive claim in an AI-generated response is directly traceable to a specific source document or passage [S1][S2][S3][S4][S5]. This means that the model ties each individual claim to the specific text that supports it, enabling the user to verify each statement independently [S1]. Grounding is crucial for trustworthiness in AI systems, as it creates transparency and allows users to verify the information independently [S4]. It also reduces \"hallucinations\" \u2013 instances where models generate false or irrelevant content \u2013 by constraining outputs to the retrieved context [S4].\n\nGrounding is not a guarantee against mistakes, as the model can still misread a source or answer from a stale one [S1]. However, it does reduce the likelihood of hallucinations by anchoring the model's output to verifiable source material [S2][S3]. Grounding also makes it easier to identify and correct errors, as the model's reasoning process is more transparent [S4].\n\nIn a Retrieval-Augmented Generation (RAG) system, grounding is achieved by designing the system to prioritize retrieved content during generation [S4]. This can be done through attention mechanisms or fine-tuning the model to reject queries if no relevant documents are found [S4]. A well-grounded system might also include citations or links to sources in its output [S4].\n\nGrounding is essential in domains like healthcare, law, or engineering, where errors can have serious consequences [S4]. It is also critical for building user trust, as it makes the system's reasoning process more transparent and verifiable [S4].",
+      "num_sources": 7,
+      "latency_seconds": 47.5,
+      "guardrail": {
+        "checked_claims": 12,
+        "flagged_claims": [],
+        "is_fully_grounded": null,
+        "guardrail_error": "Could not parse guardrail response",
+        "guardrail_raw_output": "[\n  {\n    \"claim\": \"Grounding in AI refers to the practice of ensuring that every substantive claim in an AI-generated response is directly traceable to a specific source document or passage\",\n    \"supported\": true,\n    \"reason\": \"S1 directly states this definition\"\n  },\n  {\n    \"claim\": \"This means that the model ties each individual claim to the specific text that supports it, enabling the user to verify each statement independently\",\n    \"supported\": true,\n    \"reason\": \"S1 directly states th"
+      },
+      "keyword_coverage": 1.0,
+      "grounding_rate": 1.0
+    }
+  ],
+  "hybrid": [
+    {
+      "question": "What is the difference between a bi-encoder and a cross-encoder?",
+      "answer": "The main difference between a bi-encoder and a cross-encoder is how they process input pairs. Bi-encoders encode two text inputs separately into fixed-dimensional vectors and then compute similarity, whereas cross-encoders process both inputs together in a single pass, allowing direct interaction between tokens of both texts [S1][S2][S3][S4].\n\nBi-encoders are more efficient and scalable, making them ideal for large-scale and real-time applications, such as search engines or recommendation systems [S1][S2][S3]. However, they may miss nuanced interactions between the text pairs, potentially leading to lower accuracy compared to cross-encoders [S2][S4].\n\nCross-encoders, on the other hand, excel in accuracy by modeling interactions between input pairs, but they are slower and less scalable than bi-encoders [S1][S2][S3]. They are better suited for smaller-scale tasks requiring high precision, such as final ranking or pairwise classification [S3].\n\nThe choice between bi-encoders and cross-encoders depends on the use case and the trade-off between accuracy and efficiency [S1]. Bi-encoders are a better choice when speed and scalability are critical, while cross-encoders are more accurate but slower and less scalable [S1][S2][S3].\n\nIn some cases, a hybrid approach can be used, where a bi-encoder is used for initial candidate retrieval and a cross-encoder is used for refinement [S2][S4]. This can help balance the efficiency of bi-encoders with the accuracy of cross-encoders.",
+      "num_sources": 6,
+      "latency_seconds": 57.54,
+      "guardrail": {
+        "checked_claims": 8,
+        "flagged_claims": [],
+        "is_fully_grounded": true
+      },
+      "keyword_coverage": 1.0,
+      "grounding_rate": 1.0
+    },
+    {
+      "question": "What is hybrid search in information retrieval?",
+      "answer": "Hybrid search is an information retrieval technique that combines multiple search methodologies or technologies to provide more comprehensive and accurate results. It typically involves blending traditional keyword-based searching with more advanced techniques such as natural language processing (NLP), semantic search, and machine learning [S1][S2][S3][S4][S5][S6]. This approach is ideal for enterprise environments where diverse and complex queries are common, providing employees with quick and accurate access to information [S1].\n\nHybrid search combines the strengths of lexical search and semantic search, aiming to bridge the gap between precision and conceptual understanding [S4]. It provides system robustness and a fault-tolerance mechanism to counteract the structural risks posed by pure semantic search when dealing with out-of-domain data [S4]. By integrating both sparse and dense retrieval methods, hybrid search addresses the limitations inherent in each approach when used in isolation [S6].\n\nHybrid search works by running both lexical search and semantic search in parallel, merging the results to provide a single ranked list [S2]. This approach ensures that search results are not only contextually relevant but also rich in meaning [S5]. Hybrid search is a modern, balanced solution to the increasingly complex demands of information retrieval, providing broader coverage, improved relevance, and more flexibility across varied query types [S6].",
+      "num_sources": 6,
+      "latency_seconds": 46.96,
+      "guardrail": {
+        "checked_claims": 8,
+        "flagged_claims": [],
+        "is_fully_grounded": true
+      },
+      "keyword_coverage": 0.5,
+      "grounding_rate": 1.0
+    },
+    {
+      "question": "Why is reranking used after initial retrieval?",
+      "answer": "Reranking is used after initial retrieval to refine and reorder the search results, aiming to push the most relevant items to the top of the list [S1]. This process is crucial as it addresses the limitations of traditional one-stage retrieval methods, capturing nuanced relevance signals, handling complex queries more effectively, and providing more accurate and contextually appropriate results [S1][S3]. Reranking acts as an information refinement layer, minimizing the conditional entropy of the final selection given the query [S3]. It refines the initial search results by applying more sophisticated algorithms, such as cross-encoders, which process the query and each candidate document together in a single forward pass, significantly improving accuracy but coming at the cost of higher computational requirements [S2][S4]. Rerankers work best as a second-stage ranking retrieval step, refining a set of candidates and providing the most relevant documents to improve retrieval accuracy [S4][S5].",
+      "num_sources": 6,
+      "latency_seconds": 37.74,
+      "guardrail": {
+        "checked_claims": 5,
+        "flagged_claims": [
+          {
+            "claim": "The NVIDIA NeMo Retriever reranking NIM, a transformer encoder and a LoRA fine-tuned version of Mistral-7B, is used for re-ranking and assigns relevance scores to retrieved documents or passages",
+            "supported": false,
+            "reason": "There is no information in the provided sources about the NVIDIA NeMo Retriever reranking NIM."
+          }
+        ],
+        "is_fully_grounded": false
+      },
+      "keyword_coverage": 0.6666666666666666,
+      "grounding_rate": 0.8
+    },
+    {
+      "question": "What is Reciprocal Rank Fusion?",
+      "answer": "Reciprocal Rank Fusion (RRF) is a technique for combining multiple ranked lists of search results into a single ranking. It works by evaluating search scores from multiple previously ranked results to produce a single, unified result set [S1]. RRF operates on a simple principle: documents that appear highly ranked across multiple search methods are likely to be genuinely relevant [S2]. The fusion process works as follows: start with multiple ranked lists from different retrieval methods, calculate RRF scores for each document that appears in any list, multiply by the weight (if used), merge all documents, and sort by their combined RRF scores [S2].\n\nThe RRF formula is as follows: RRF(d) = \u03a3(r \u2208 R) 1 / (k + r(d)), where d is a document, R is the set of rankers (retrievers), k is a constant (typically 60), and r(d) is the rank of document d in ranker r [S3][S4]. RRF has three key strengths: it can combine rankings from multiple retrievers in a mathematically sound and intuitively appealing way, it can produce robust and relevant document rankings, and it can be used in various applications, including information retrieval and retrieval augmented generation (RAG) [S3][S4].\n\nRRF is an advanced algorithmic technique designed to amalgamate multiple result sets, each having distinct relevance indicators, into a unified result set [S5]. It does not mandate the relevance indicators to be interconnected or similar in nature, and it can deliver high-quality results without the necessity for any tuning.",
+      "num_sources": 6,
+      "latency_seconds": 48.82,
+      "guardrail": {
+        "checked_claims": 6,
+        "flagged_claims": [],
+        "is_fully_grounded": true
+      },
+      "keyword_coverage": 1.0,
+      "grounding_rate": 1.0
+    },
+    {
+      "question": "What does it mean for an AI answer to be grounded in its sources?",
+      "answer": "For an AI answer to be grounded in its sources, it means that the model's output is anchored to verifiable source material, allowing its answers to be traced back to real, specific information [S1]. This is achieved by retrieving evidence from knowledge bases and citing sources, rather than relying on patterns learned during training [S2]. Grounding ensures that the model doesn't invent facts or rely solely on its internal knowledge, which can be incomplete or outdated [S3]. A well-grounded system might include citations or links to sources in its output, making the system's reasoning process more transparent and trustworthy [S3]. Grounding also reduces \"hallucinations\" \u2013 instances where models generate false or irrelevant content \u2013 by constraining outputs to the retrieved context [S3]. However, grounding depends on the quality of the retrieval step, and developers must balance retrieval accuracy with generation constraints to ensure answers are both accurate and traceable [S3].",
+      "num_sources": 6,
+      "latency_seconds": 56.9,
+      "guardrail": {
+        "checked_claims": 6,
+        "flagged_claims": [
+          {
+            "claim": "Grounding ensures that the model doesn't invent facts or rely solely on its internal knowledge, which can't be verified",
+            "supported": false,
+            "reason": "S3 states that grounding ensures the model doesn't invent facts or rely solely on its internal knowledge, which can be incomplete or outdated, not unverifiable."
+          }
+        ],
+        "is_fully_grounded": false
+      },
+      "keyword_coverage": 0.6666666666666666,
+      "grounding_rate": 0.8333333333333334
+    }
+  ]
+}

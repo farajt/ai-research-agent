@@ -5,6 +5,7 @@ from langchain_groq import ChatGroq
 from langfuse import observe
 
 from app.config import settings
+from app.utils.retry import with_retry
 
 _llm = None
 
@@ -83,6 +84,11 @@ def _build_verification_prompt(claims: list[dict], chunks: list[dict]) -> str:
     return "\n".join(lines)
 
 
+@with_retry()
+def _invoke_guardrail_llm(llm, messages):
+    return llm.invoke(messages)
+
+
 @observe(as_type="generation")
 def check_groundedness(answer: str, chunks: list[dict]) -> dict:
     """Runs a second LLM pass to verify every cited claim in the answer is
@@ -100,18 +106,19 @@ def check_groundedness(answer: str, chunks: list[dict]) -> dict:
     prompt = _build_verification_prompt(claims, chunks)
 
     try:
-        response = llm.invoke(
+        response = _invoke_guardrail_llm(
+            llm,
             [
                 {"role": "system", "content": GUARDRAIL_SYSTEM_PROMPT},
                 {"role": "user", "content": prompt},
-            ]
+            ],
         )
     except Exception as e:
         # The guardrail is a safety net, not the main path - if the call
-        # itself fails (rate limit, network issue, provider outage), don't
-        # take the whole /query endpoint down with it. Surface the failure
-        # so it's visible, but let the answer through ungrounded-unverified
-        # rather than erroring out entirely.
+        # still fails after retries (provider outage, persistent rate limit),
+        # don't take the whole /query endpoint down with it. Surface the
+        # failure so it's visible, but let the answer through
+        # ungrounded-unverified rather than erroring out entirely.
         return {
             "checked_claims": len(claims),
             "flagged_claims": [],

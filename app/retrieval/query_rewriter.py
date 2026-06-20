@@ -4,6 +4,7 @@ from langchain_groq import ChatGroq
 from langfuse import observe
 
 from app.config import settings
+from app.utils.retry import with_retry
 
 _llm = None
 
@@ -25,6 +26,7 @@ Example: ["query one", "query two"]"""
 
 
 @observe()
+@with_retry()
 def rewrite_query(question: str) -> list[str]:
     llm = get_llm()
     response = llm.invoke(
