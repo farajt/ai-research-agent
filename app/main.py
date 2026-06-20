@@ -7,6 +7,7 @@ from app.retrieval.hybrid_search import hybrid_local_search
 from app.retrieval.query_rewriter import rewrite_query
 from app.retrieval.reranker import rerank
 from app.generation.synthesizer import synthesize_answer
+from app.guardrails.citation_checker import check_groundedness
 
 app = FastAPI(title="AI Research Agent - Week 2 (hybrid retrieval + reranking)")
 
@@ -47,10 +48,12 @@ def query(request: QueryRequest):
     top_chunks = rerank(request.question, deduped, top_k=6)
 
     result = synthesize_answer(request.question, top_chunks)
-    # Exposed for debugging/observability now; week 3's tracing will capture
-    # this properly instead of just returning it inline.
     result["sub_queries"] = sub_queries
     result["candidates_before_rerank"] = len(deduped)
+
+    guardrail_result = check_groundedness(result["answer"], top_chunks)
+    result["guardrail"] = guardrail_result
+
     return result
 
 
